@@ -10,6 +10,10 @@ class RepresentativeSpider(scrapy.Spider):
     info_div: scrapy.http.Response = None
 
     def parse(self, response: scrapy.http.Response, **kwargs):
+        """
+        :param response: list of representatives
+        :return: results of scrapping
+        """
         representatives = self.__get_a_href_list(response)
         for representative in representatives:
             url = urljoin(self.base_url, representative)
@@ -30,12 +34,6 @@ class RepresentativeSpider(scrapy.Spider):
         self.result['zdjęcie'] = self.__get_picture()
         data_uls = self.__get_data_uls()
         self.__get_static_info(data_uls)
-        # Opiniowanie projektów UE - Rafał Bochenek
-        self.__get_static_datum_from_dynamic_div('#view\:_id1\:_id2\:facetMain\:_id189\:opinieue')
-        # Naruszenie zasad etyki poselskiej - Grzegorz Braun
-        self.__get_static_datum_from_dynamic_div('#view\:_id1\:_id2\:facetMain\:_id189\:naruszenie')
-        # Strona WWW - Wanda Nowicka
-        self.__get_static_datum_from_dynamic_div('#view\:_id1\:_id2\:facetMain\:_id189\:_id274', '#poselWWW::text')
         yield self.result
 
     def __get_info_div(self, response: scrapy.http.Response):
@@ -65,7 +63,20 @@ class RepresentativeSpider(scrapy.Spider):
                 if key:
                     self.result[key] = li.css('p.right::text').get()
 
+        # Opiniowanie projektów UE - Rafał Bochenek
+        self.__get_static_datum_from_dynamic_div('#view\:_id1\:_id2\:facetMain\:_id189\:opinieue')
+        # Naruszenie zasad etyki poselskiej - Grzegorz Braun
+        self.__get_static_datum_from_dynamic_div('#view\:_id1\:_id2\:facetMain\:_id189\:naruszenie')
+        # Strona WWW - Wanda Nowicka
+        self.__get_static_datum_from_dynamic_div('#view\:_id1\:_id2\:facetMain\:_id189\:_id274', '#poselWWW::text')
+
     def __get_static_datum_from_dynamic_div(self, css_selector: str, key_css_selector=""):
+        """
+        Ensure if the static element exists then store it in result.
+        :param css_selector: css selector to the static element [value]
+        :param key_css_selector: css selector to the static element [key]
+        :return:
+        """
         element = self.info_div.css(css_selector)
         if element:
             if key_css_selector:
