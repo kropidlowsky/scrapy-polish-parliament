@@ -135,7 +135,10 @@ end
             for li in ul.css('li'):
                 key = li.css('p.left::text').get()
                 if key:
-                    self.result[key] = li.css('p.right::text').get()
+                    value = li.css('p.right::text').get()
+                    if not value:
+                        value = li.css('p.right > a::text').get()
+                    self.result[key] = value
 
         # Opiniowanie projektów UE - Rafał Bochenek
         self.__get_static_datum_from_dynamic_div('#view\:_id1\:_id2\:facetMain\:_id189\:opinieue')
